@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Initial GIT push: 6.21.2024
-Last Edit: 6.21.2024
+Graphing LPC Thermal Chamber Results
+Mark Turner
+Created 6/7/24
 
-@author: Mark Turner
-
-Graphs data from pump testing: temperatures, currents, time and airflow
-
-NOTE: the currents (I_pump1 and I_pump2) were switched in the Arduino code for most of 
-the tests and thus are also switched in the graphs
+NOTE: The labels for Current 1 and Current 2 are still switched in the LOPC code
 """
-#%reset
+#reset
 from IPython import get_ipython
 get_ipython().magic('clear')
 get_ipython().magic('reset -f')
@@ -20,7 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-filename = 'Pumps_3_and_4_2'
+plt.close('all')
+
+filename = 'LPC0008_ThermalTest1B'
 pump1 = 5;
 pump2 = 6;
 filename2 = filename + '.txt'
@@ -32,7 +30,8 @@ os.makedirs(results_dir, exist_ok=True)
 
 pump_data = pd.read_table(filename2, sep=",", header=[0])
 pump_data.rename(columns=lambda x: x.strip(), inplace=True)
-time = pump_data['Time']
+maxTime = len(pump_data) * 5
+time = range(0,maxTime,5)
 temp_hrs = 0;
 temp_min = 0;
 temp_sec = 0;
@@ -60,30 +59,31 @@ for x in time:
 
 
 '''
-#pump_data[[' T_Pump1 [C]',' T_Pump2 [C]', ' T_PCB [C]']].plot()
-plt.figure()
-pump_data.plot(x="Time", y = ['T_Pump1 [C]','T_Pump2 [C]', 'T_PCB [C]'])
+plt.plot(time, pump_data['T_Pump1 [C]'],time, pump_data['T_Pump2 [C]'],time, pump_data['T_PCB [C]'])
 #plt.plot(time,pump_data['T_Pump1 [C]'],'s')
 plt.ylabel("Temperature")
 plt.grid()
+plt.ylim([-15, 0])
 plt.title(filename.replace("_",' ')+" Pump Temperature vs Time")
+plt.legend(['Pump 1','Pump 2','PCB'])
 plt.savefig(os.path.join(results_dir,filename+"PumpTemps.png"))
 
 plt.figure()
-pump_data.plot(x="Time", y = 'Flow [SLM]')
+plt.plot(time, pump_data['Flow [SLM]'])
 #plt.xticks(rotation=90)
 #plt.locator_params(axis='x', nbins=10)
-plt.ylim((10, 15))
+plt.ylim((8, 12))
 plt.grid()
 plt.title(filename.replace("_",' ')+" Flow Rate vs Time")
 plt.savefig(os.path.join(results_dir,filename+"PumpFlow.png"))
 
 plt.figure()
-pump_data.plot(x="Time", y = ['I_Pump1 [A]', 'I_Pump2 [A]'])
+plt.plot(time, pump_data['I_Pump1 [A]'],time, pump_data['I_Pump2 [A]'])
 plt.ylabel("Current [A]")
 plt.grid()
-plt.ylim((200, 700))
+#plt.ylim((200, 700))
 plt.title(filename.replace("_",' ')+" Pump Current vs Time")
+plt.legend(['Pump 1','Pump 2'])
 plt.savefig(os.path.join(results_dir,filename+"PumpCurrent.png"))
 
 
@@ -98,29 +98,39 @@ BEMF2_smooth = smooth(pump_data['BEMF_2'],50)
 #fig = plt.figure
 plt.figure()
 plt.plot(time, BEMF1_smooth)
-#plt.plot(time, BEMF2_smooth)
+plt.plot(time, BEMF2_smooth)
 plt.ylabel("Pump Back EMF [V]")
 plt.grid('major',linewidth = 0.5)
 plt.ylim((2, 8))
 plt.xticks(rotation=270)
 plt.title(filename.replace("_",' ')+" Pump Back EMF vs Time")
+plt.legend(['Pump 1','Pump 2'])
 plt.savefig(os.path.join(results_dir,filename+"PumpBEMF.png"))
 
 plt.figure()
-pump_data.plot(x="Time", y = ['Pump1_PWM', 'Pump2_PWM'])
+plt.plot(time, pump_data['Pump1_PWM'],time, pump_data['Pump2_PWM'])
 plt.ylabel("Pump PWM Count")
 plt.grid()
-plt.ylim((400, 1000))
+#plt.ylim((400, 1000))
 plt.title(filename.replace("_",' ')+" Pump PWM vs Time")
+plt.legend(['Pump 1','Pump 2'])
 plt.savefig(os.path.join(results_dir,filename+"PumpPWM.png"))
 
+plt.figure()
+plt.plot(time, pump_data['I_Det [mA]'])
+plt.ylabel("I_Det [mA]")
+plt.grid()
+#plt.ylim((400, 1000))
+plt.title(filename.replace("_",' ')+" I_Det [mA] vs Time")
+plt.savefig(os.path.join(results_dir,filename+"I_Det [mA].png"))
+'''
 plt.figure()
 pump_data.plot(x="Time", y = ['PumpCycle'], marker='o',linewidth=0,markersize=0.1)
 plt.ylabel("Pump Cycle Count")
 plt.grid()
 plt.title(filename.replace("_",' ')+" Pump Cycle Count vs Time")
 plt.savefig(os.path.join(results_dir,filename+"PumpCycle.png"))
-'''
+
 
 def smooth(y, box_pts):
     box = np.ones(box_pts)/box_pts
