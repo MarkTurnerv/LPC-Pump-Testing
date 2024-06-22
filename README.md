@@ -22,3 +22,12 @@ Takes txt files (manually transferred from LOPC mainboard SD card) and plots the
 
 ### User Input
 The filename must be manually changed on line 21 of the code.
+
+## Data folder
+Holds data from pump tests.
+
+## Checkout
+Holds documentation from LPC checkout and results from running known particle sizes through the Optical Partical Counter (OPC)
+
+## Graphs
+Holds Pump Test and Thermal Chamber graphs
